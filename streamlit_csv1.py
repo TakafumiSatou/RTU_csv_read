@@ -9,7 +9,7 @@ import os
 
 rcParams['font.family'] = 'Meiryo'
 
-st.title("RTU結果から作業時間を分析するアプリ")
+st.title("RTU用 作業時間分析アプリ")
 
 # CSVファイルのアップロード
 uploaded_csv = st.file_uploader("CSVファイルをアップロードしてください", type="csv")
@@ -125,5 +125,6 @@ if "df" in st.session_state:
         plot_graph()
 else:
     st.warning("CSVファイルをアップロードしてください。")
+
 
 
