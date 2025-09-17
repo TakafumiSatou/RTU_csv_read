@@ -2,5 +2,3 @@ streamlit
 matplotlib
 pandas
 numpy
-io
-os
