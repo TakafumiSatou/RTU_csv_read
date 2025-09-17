@@ -95,7 +95,7 @@ if "df" in st.session_state:
             mean_val = filtered_data.mean()
             median_val = filtered_data.median()
 
-            text_str = f"平均値: {mean_val:.2f} sec\n中央値: {median_val:.2f} sec"
+            text_str = f"mean: {mean_val:.2f} sec\nmedian: {median_val:.2f} sec"
             ax.text(
                 0.95, 0.95, text_str,
                 transform=ax.transAxes,
@@ -125,4 +125,5 @@ if "df" in st.session_state:
         plot_graph()
 else:
     st.warning("CSVファイルをアップロードしてください。")
+
 
