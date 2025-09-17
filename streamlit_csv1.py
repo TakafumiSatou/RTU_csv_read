@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from matplotlib import rcParams
 import io
+import os
 
-# 日本語フォント設定（クラウド環境では Meiryo がない場合あり）
 rcParams['font.family'] = 'Meiryo'
 
 st.title("RTU結果から作業時間を分析するアプリ")
@@ -17,11 +17,12 @@ uploaded_csv = st.file_uploader("CSVファイルをアップロードしてく�
 # 画像ファイルのアップロード（複数可）
 uploaded_images = st.file_uploader("画像ファイルをアップロードしてください（複数選択可）", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
 
-# 画像ファイル名とバイナリを辞書に保存
+# 画像ファイル名とバイナリを辞書に保存（拡張子を除いたキーで保存）
 image_dict = {}
 if uploaded_images:
     for img in uploaded_images:
-        image_dict[img.name] = img
+        base_name = os.path.splitext(img.name)[0].lower()
+        image_dict[base_name] = img
 
 # CSVの処理
 if uploaded_csv is not None:
@@ -33,31 +34,40 @@ if uploaded_csv is not None:
         df = df.sort_values("日時").reset_index(drop=True)
         df.insert(df.columns.get_loc("ファイル名")+1, "Time", df["日時"].diff().dt.total_seconds())
 
-        st.write("### テーブル（行頭をクリックして画像を表示）")
+        st.write("### データテーブル")
         st.dataframe(df, use_container_width=True)
+
+        # 行選択：ファイル名を選ぶ
+        selected_row = st.selectbox("画像を表示する行を選んでください", df.index)
+        selected_file = df.loc[selected_row, "ファイル名"]
+        match_key = os.path.splitext(selected_file)[0].lower()
+
+        # 柔軟なマッチング
+        matched_img = None
+        for key in image_dict:
+            if match_key in key:
+                matched_img = image_dict[key]
+                break
+
+        if matched_img:
+            st.image(matched_img, caption=selected_file, use_container_width=True)
+        else:
+            st.warning(f"画像が見つかりません: {selected_file}")
 
         # セッションに保存
         st.session_state["df"] = df
-        st.session_state["image_dict"] = image_dict
     else:
         st.error("CSVに必要な列（日時、ファイル名、判定結果）が含まれていません。")
+else:
+    st.warning("CSVファイルをアップロードしてください。")
+
 
 # -------------------------
 # セッションからdfと画像を利用
 # -------------------------
 if "df" in st.session_state:
     df = st.session_state["df"]
-    image_dict = st.session_state.get("image_dict", {})
-
-    # ファイル名選択
-    selected_file = st.selectbox("画像を表示するファイル名を選んでください", df["ファイル名"].unique())
-
-    # 画像表示
-    if selected_file in image_dict:
-        st.image(image_dict[selected_file], caption=selected_file, use_container_width=True)
-    else:
-        st.warning(f"画像が見つかりません: {selected_file}")
-
+    
     def plot_graph():
         column = "Time"
         bins = st.slider("ビンの数 (棒の数)", min_value=5, max_value=100, value=50)
@@ -115,3 +125,4 @@ if "df" in st.session_state:
         plot_graph()
 else:
     st.warning("CSVファイルをアップロードしてください。")
+
