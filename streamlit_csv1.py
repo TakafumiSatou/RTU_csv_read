@@ -23,7 +23,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("RTU用 作業時間分析アプリ", layout="wide")
+st.set_page_config(page_title="RTU用 作業時間分析アプリ", layout="wide")
+#st.title("RTU用 作業時間分析アプリ")
 
 # CSVファイルのアップロード
 uploaded_csv = st.file_uploader("CSVファイルをアップロードしてください", type="csv")
@@ -139,6 +140,7 @@ if "df" in st.session_state:
         plot_graph()
 else:
     st.warning("CSVファイルをアップロードしてください。")
+
 
 
 
